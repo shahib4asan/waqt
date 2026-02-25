@@ -278,7 +278,7 @@ type C = typeof themes.dark;
 const GLOBAL_CSS = `
   @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Noto+Serif:wght@400;700&display=swap');
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body { overflow-x: hidden; font-family: 'Hind Siliguri', sans-serif; }
+  body { overflow-x: hidden; font-family: 'Hind Siliguri', sans-serif; -webkit-text-size-adjust: 100%; touch-action: pan-y; }
   ::-webkit-scrollbar { width: 6px; }
   ::-webkit-scrollbar-track { background: #f0f0f0; }
   ::-webkit-scrollbar-thumb { background: #1a6b3a; border-radius: 3px; }
@@ -310,14 +310,18 @@ const GLOBAL_CSS = `
   /* ─ Responsive helpers ─ */
   .hide-sm   { }
   .show-sm   { display:none !important; }
+  .show-sm-flex { display:none !important; }
   .desk-nav  { display:flex; }
   .mob-nav   { display:none !important; }
   .searchbar { display:flex; }
 
+  /* Mobile utility bar — show compact version */
+  .mob-util-bar { display:none; }
 
   @media(max-width:768px){
     .hide-sm   { display:none !important; }
     .show-sm   { display:block !important; }
+    .show-sm-flex { display:flex !important; }
     .desk-nav  { display:none !important; }
     .mob-nav   { display:flex !important; }
     .searchbar { display:none !important; }
@@ -325,13 +329,70 @@ const GLOBAL_CSS = `
     .home-2c   { grid-template-columns:1fr !important; }
     .mini-2c   { grid-template-columns:1fr !important; }
     .art-grid  { grid-template-columns:1fr !important; }
-    .foot-cols { flex-direction:column !important; }
+    .foot-cols { flex-direction:column !important; gap:24px !important; }
     .prayers-r { flex-wrap:wrap !important; }
     .p-card    { min-width:calc(33.3% - 6px) !important; flex: none !important; }
     .util-bar  { display:none !important; }
+    .mob-util-bar { display:flex !important; }
+
+    /* Main content padding for bottom nav */
+    main { padding: 16px 12px 80px !important; }
+
+    /* Breadcrumb */
+    .breadcrumb { padding: 8px 12px !important; font-size:12px !important; }
+
+    /* Prayer times hero card */
+    .pt-hero-inner { flex-direction:column !important; gap:10px !important; }
+    .pt-hero-clock { text-align:left !important; }
+    .pt-hero-clock span { font-size:22px !important; }
+
+    /* Quran table — hide Arabic col, compress */
+    .quran-arabic { display:none !important; }
+    .quran-grid   { grid-template-columns:36px 1fr 50px 46px !important; }
+    .quran-hdr    { grid-template-columns:36px 1fr 50px 46px !important; }
+
+    /* Hadith page */
+    .hadith-layout { flex-direction:column !important; }
+    .hadith-sidebar { width:100% !important; max-width:100% !important; min-width:unset !important; border-right:none !important; border-bottom:1px solid var(--border); }
+
+    /* Mosque stat grid */
+    .mosque-stats { grid-template-columns:1fr 1fr !important; }
+
+    /* Tasbih side panels hidden on small screens */
+    .tf-sidebar-left, .tf-sidebar-right { display:none !important; }
+    .tf-grid { grid-template-columns:1fr !important; }
+
+    /* News category tabs */
+    .news-cats { flex-wrap:wrap !important; gap:6px !important; }
+
+    /* Footer */
+    .foot-cols > div { max-width:100% !important; }
+
+    /* Modal */
+    .sci { padding:20px !important; border-radius:16px !important; }
+
+    /* Settings/profile modal fields */
+    .modal-grid { grid-template-columns:1fr !important; }
   }
+
   @media(max-width:480px){
     .p-card    { min-width:calc(50% - 4px) !important; }
+    main { padding: 12px 10px 80px !important; }
+
+    /* Sehri/Iftar time font */
+    .si-time { font-size:32px !important; }
+
+    /* Prayer times hero date */
+    .pt-hero-date { font-size:15px !important; }
+
+    /* Quran row */
+    .quran-num-circle { width:22px !important; height:22px !important; font-size:9px !important; }
+  }
+
+  /* Touch targets — all interactive elements on mobile */
+  @media(max-width:768px){
+    button { min-height:40px; }
+    .nav-link { min-height:44px !important; }
   }
 
 
@@ -708,19 +769,19 @@ function QuranPage({ C, audio }: { C:C; audio:AudioHook }) {
           <input style={{ width:"100%", background:C.surface2, border:`1px solid ${C.border}`, borderRadius:6, padding:"7px 12px", color:C.text, fontSize:13, outline:"none", fontFamily:"inherit" }} placeholder={t("surahSearchPlaceholder",lang)} value={search} onChange={e => setSearch(e.target.value)} />
         </div>
         {/* Column header */}
-        <div style={{ background:C.surface2, border:`1px solid ${C.border}`, borderTop:"none", display:"grid", gridTemplateColumns:"44px 1fr 100px 60px 110px", padding:"7px 14px", fontSize:11, fontWeight:700, color:C.textDim, letterSpacing:"0.07em" }}>
-          <span>#</span><span>{t("surahCol",lang)}</span><span style={{ textAlign:"right", paddingRight:28 }}>Arabic</span><span style={{ textAlign:"center" }}>{t("versesCol",lang)}</span><span style={{ textAlign:"right" }}>{t("audioCol",lang)}</span>
+        <div className="quran-hdr" style={{ background:C.surface2, border:`1px solid ${C.border}`, borderTop:"none", display:"grid", gridTemplateColumns:"44px 1fr 100px 60px 110px", padding:"7px 14px", fontSize:11, fontWeight:700, color:C.textDim, letterSpacing:"0.07em" }}>
+          <span>#</span><span>{t("surahCol",lang)}</span><span className="quran-arabic" style={{ textAlign:"right", paddingRight:28 }}>Arabic</span><span style={{ textAlign:"center" }}>{t("versesCol",lang)}</span><span style={{ textAlign:"right" }}>{t("audioCol",lang)}</span>
         </div>
         {/* Rows */}
         <div style={{ background:C.surface, border:`1px solid ${C.border}`, borderTop:"none", borderRadius:"0 0 8px 8px", overflow:"hidden" }}>
           {list.map((s, i) => (
-            <div key={s.num} style={{ display:"grid", gridTemplateColumns:"44px 1fr 100px 60px 110px", alignItems:"center", padding:"9px 14px", borderBottom: i<list.length-1?`1px solid ${C.border}`:"none", background: audio.current===s.num&&audio.playing?"rgba(26,107,58,.06)":"transparent", transition:"background .15s", animation:`fadeUp .35s ${i*.03}s both` }}>
-              <div style={{ width:28, height:28, background:"#1a6b3a", borderRadius:"50%", display:"flex", alignItems:"center", justifyContent:"center", fontSize:11, fontWeight:700, color:"#fff" }}>{s.num}</div>
+            <div key={s.num} className="quran-grid" style={{ display:"grid", gridTemplateColumns:"44px 1fr 100px 60px 110px", alignItems:"center", padding:"9px 14px", borderBottom: i<list.length-1?`1px solid ${C.border}`:"none", background: audio.current===s.num&&audio.playing?"rgba(26,107,58,.06)":"transparent", transition:"background .15s", animation:`fadeUp .35s ${i*.03}s both` }}>
+              <div className="quran-num-circle" style={{ width:28, height:28, background:"#1a6b3a", borderRadius:"50%", display:"flex", alignItems:"center", justifyContent:"center", fontSize:11, fontWeight:700, color:"#fff" }}>{s.num}</div>
               <div>
                 <div style={{ fontSize:14, fontWeight:600, color:C.text }}>{s.name}</div>
                 <div style={{ fontSize:11, color:C.textDim }}>{s.type} · {s.type==="মাক্কী"||s.type==="Meccan"?"Meccan":"Medinan"}</div>
               </div>
-              <div style={{ fontSize:17, color:C.textMid, fontFamily:"Georgia,serif", textAlign:"right", paddingRight:20, direction:"rtl" }}>{s.arabic}</div>
+              <div className="quran-arabic" style={{ fontSize:17, color:C.textMid, fontFamily:"Georgia,serif", textAlign:"right", paddingRight:20, direction:"rtl" }}>{s.arabic}</div>
               <div style={{ fontSize:12, color:C.textDim, textAlign:"center" }}>{s.verses}</div>
               <div style={{ display:"flex", justifyContent:"flex-end" }}><AudioBar n={s.num} audio={audio} C={C} /></div>
             </div>
@@ -1703,7 +1764,7 @@ function NewsPage({ C }: { C:C }) {
                     <span style={{ color:C.textDim, fontSize:16, flexShrink:0, marginTop:2 }}>{open===i?"▾":"›"}</span>
                   </div>
                   {open===i && (
-                    <div style={{ marginTop:10, paddingTop:10, borderTop:`1px solid ${C.border}`, paddingLeft:64 }}>
+                    <div style={{ marginTop:10, paddingTop:10, borderTop:`1px solid ${C.border}`, paddingLeft:0 }}>
                       {n.description && <div style={{ fontSize:13, color:C.textMid, lineHeight:1.7, marginBottom:10 }}>{n.description}…</div>}
                       <a href={n.link} target="_blank" rel="noopener noreferrer"
                         style={{ display:"inline-block", background:"#1a6b3a", border:"none", borderRadius:6, padding:"6px 16px", color:"#fff", fontSize:12, fontWeight:600, cursor:"pointer", textDecoration:"none" }}>
@@ -1865,13 +1926,13 @@ function PrayerTimesPage({ C }: { C: C }) {
       <div style={{ display:"flex", flexDirection:"column", gap:14 }}>
         {/* Hero card */}
         <div style={{ background: C.text==="#e8f5ee" ? "linear-gradient(135deg,#1A2830,#0F1820)" : "linear-gradient(135deg,#0d4a2e,#1a6b3a)", border:`1px solid ${C.border}`, borderRadius:14, padding:22, position:"relative", overflow:"hidden" }}>
-          <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", flexWrap:"wrap", gap:12 }}>
+          <div className="pt-hero-inner" style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", flexWrap:"wrap", gap:12 }}>
             <div>
               <div style={{ fontSize:11, letterSpacing:"0.12em", color:"rgba(255,255,255,.6)", marginBottom:5 }}>আজ · Today — ঢাকা, Bangladesh</div>
-              <div style={{ fontSize:20, fontWeight:800, color:"#fff", marginBottom:3 }}>{gDate.weekday.en}, {gDate.day} {gDate.month.en} {gDate.year}</div>
+              <div className="pt-hero-date" style={{ fontSize:20, fontWeight:800, color:"#fff", marginBottom:3 }}>{gDate.weekday.en}, {gDate.day} {gDate.month.en} {gDate.year}</div>
               <div style={{ fontSize:14, color:"#a3e4b8", fontFamily:"Georgia,serif" }}>{hDate.day} {hDate.month.ar} {hDate.year} AH</div>
             </div>
-            <div style={{ textAlign:"right" }}>
+            <div className="pt-hero-clock" style={{ textAlign:"right" }}>
               <span ref={clockElRef} style={{ fontSize:30, fontWeight:900, color:"#fff", fontVariantNumeric:"tabular-nums", letterSpacing:"-0.02em", display:"block" }}>{nowDisplayRef.current}</span>
               <div style={{ fontSize:11, color:"rgba(255,255,255,.6)", marginTop:3 }}>Asia/Dhaka (UTC+6)</div>
               {nextPrayer && (
@@ -2249,7 +2310,7 @@ function HomePage({ C, audio, goNews, profile }: { C:C; audio:AudioHook; goNews:
             ) : (
               <>
                 <div>
-                  <span className="pulse-a" style={{ fontSize:42, fontWeight:900, color:C.gold, lineHeight:1, display:"inline-block" }}>{sehriF?.display ?? "--:--"}</span>
+                  <span className="pulse-a si-time" style={{ fontSize:42, fontWeight:900, color:C.gold, lineHeight:1, display:"inline-block" }}>{sehriF?.display ?? "--:--"}</span>
                   <span style={{ fontSize:14, color:C.textMid, verticalAlign:"super" }}> {sehriF?.ampm}</span>
                 </div>
                 {siRemaining.sehri && (
@@ -2272,7 +2333,7 @@ function HomePage({ C, audio, goNews, profile }: { C:C; audio:AudioHook; goNews:
             ) : (
               <>
                 <div>
-                  <span style={{ fontSize:42, fontWeight:900, color:"#4A9ECA", lineHeight:1 }}>{iftarF?.display ?? "--:--"}</span>
+                  <span className="si-time" style={{ fontSize:42, fontWeight:900, color:"#4A9ECA", lineHeight:1 }}>{iftarF?.display ?? "--:--"}</span>
                   <span style={{ fontSize:14, color:C.textMid, verticalAlign:"super" }}> {iftarF?.ampm}</span>
                 </div>
                 {siRemaining.iftar && (
@@ -2438,7 +2499,7 @@ export default function Home() {
       <style>{GLOBAL_CSS}</style>
       <style>{`:root { --border: ${C.border}; --surface2: ${C.surface2}; --textDim: ${C.textDim}; }`}</style>
 
-      <div style={{ minHeight:"100vh", background:C.bg, color:C.text, fontFamily: lang==="en" ? "'Segoe UI','Helvetica Neue',sans-serif" : "'Hind Siliguri','Segoe UI',sans-serif", display:"flex", flexDirection:"column", transition:"background .25s,color .25s" }}>
+      <div style={{ minHeight:"100vh", background:C.bg, color:C.text, fontFamily: lang==="en" ? "'Segoe UI','Helvetica Neue',sans-serif" : "'Hind Siliguri','Segoe UI',sans-serif", display:"flex", flexDirection:"column", transition:"background .25s,color .25s", overflowX:"hidden" }}>
 
         {/* ══ TOP UTILITY BAR ══ */}
         <div className="util-bar" style={{ background: dark ? "#0b1a10" : "#0d4a2e", borderBottom:"1px solid rgba(255,255,255,.1)", padding:"0 20px", height:38, justifyContent:"space-between" }}>
@@ -2466,7 +2527,7 @@ export default function Home() {
         </div>
 
         {/* ══ MAIN GREEN NAV ══ */}
-        <nav style={{ background: dark ? "#0f1f16" : "#1a6b3a", position:"sticky", top:0, zIndex:200, boxShadow:"0 2px 8px rgba(0,0,0,.2)" }}>
+        <nav style={{ background: dark ? "#0f1f16" : "#1a6b3a", position:"sticky", top:0, zIndex:200, boxShadow:"0 2px 8px rgba(0,0,0,.2)", WebkitOverflowScrolling:"touch" } as React.CSSProperties}>
           <div style={{ maxWidth:1320, margin:"0 auto", padding:"0 16px", display:"flex", alignItems:"center", gap:0 }}>
             {/* Logo */}
             <div onClick={() => setPage("Prayer")} style={{ display:"flex", alignItems:"center", gap:8, cursor:"pointer", padding:"0 16px 0 0", borderRight:"1px solid rgba(255,255,255,.2)", height:46, userSelect:"none", flexShrink:0, marginRight:6 }}>
@@ -2487,21 +2548,32 @@ export default function Home() {
             {/* Right: settings + hamburger */}
             <div style={{ display:"flex", alignItems:"center", gap:6, marginLeft:"auto" }}>
               <button onClick={() => setShowSettings(true)} className="hide-sm" style={{ background:"rgba(255,255,255,.1)", border:"1px solid rgba(255,255,255,.2)", borderRadius:6, padding:"5px 12px", color:"#fff", fontSize:12, cursor:"pointer", fontFamily:"inherit" }}>{lang==="bn"?"⚙️ সেটিংস":"⚙️ Settings"}</button>
-              <button onClick={() => setMobMenu(o => !o)} style={{ display:"none", background:"none", border:"none", cursor:"pointer", fontSize:20, color:"#fff", padding:4 }} className="show-sm">☰</button>
+              {/* Mobile: lang + dark + profile + hamburger */}
+              <button onClick={() => setLang(l => l==="bn"?"en":"bn")} className="show-sm" style={{ background:"rgba(255,255,255,.1)", border:"1px solid rgba(255,255,255,.2)", borderRadius:6, padding:"4px 8px", fontSize:10, cursor:"pointer", color:"#fff", fontFamily:"inherit", fontWeight:600 }}>
+                🌐 {lang==="bn"?"EN":"বাং"}
+              </button>
+              <button onClick={() => setDark(d => !d)} className="show-sm-flex" style={{ background:"rgba(255,255,255,.1)", border:"1px solid rgba(255,255,255,.2)", borderRadius:6, width:30, height:30, fontSize:14, cursor:"pointer", alignItems:"center", justifyContent:"center", color:"#fff" }}>{dark?"☀️":"🌙"}</button>
+              <button onClick={() => setShowProfile(true)} className="show-sm-flex" style={{ background:"none", border:"none", cursor:"pointer", padding:2, alignItems:"center", justifyContent:"center" }}>
+                <div style={{ width:28, height:28, borderRadius:"50%", background:"linear-gradient(135deg,#2ecc71,#1a6b3a)", border:"2px solid rgba(255,255,255,.35)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:12, overflow:"hidden" }}>
+                  {profile.avatar ? <img key={profile.avatar} src={profile.avatar} alt="av" style={{ width:"100%", height:"100%", objectFit:"cover" }} /> : "👤"}
+                </div>
+              </button>
+              <button onClick={() => setMobMenu(o => !o)} style={{ display:"none", background:"none", border:"none", cursor:"pointer", fontSize:22, color:"#fff", padding:"0 4px", lineHeight:1 }} className="show-sm">☰</button>
             </div>
           </div>
 
           {/* Mobile dropdown */}
           {mobMenu && (
-            <div style={{ background: dark ? "#0b1a10" : "#0d4a2e", borderTop:"1px solid rgba(255,255,255,.1)" }}>
+            <div style={{ background: dark ? "#0b1a10" : "#0d4a2e", borderTop:"1px solid rgba(255,255,255,.1)", maxHeight:"80vh", overflowY:"auto" }}>
               {ALL_PAGES.map(item => (
                 <button key={item} onClick={() => { setPage(item); setMobMenu(false); }}
-                  style={{ display:"block", width:"100%", textAlign:"left", background: page===item?"rgba(46,204,113,.15)":"none", border:"none", borderLeft: page===item?"3px solid #2ecc71":"3px solid transparent", color: page===item?"#2ecc71":"rgba(255,255,255,.85)", fontSize:14, fontWeight: page===item?700:400, cursor:"pointer", padding:"12px 20px", fontFamily:"inherit" }}>
+                  style={{ display:"block", width:"100%", textAlign:"left", background: page===item?"rgba(46,204,113,.15)":"none", border:"none", borderLeft: page===item?"3px solid #2ecc71":"3px solid transparent", color: page===item?"#2ecc71":"rgba(255,255,255,.85)", fontSize:14, fontWeight: page===item?700:400, cursor:"pointer", padding:"14px 20px", fontFamily:"inherit" }}>
                   {item==="Prayer" ? (lang==="bn"?"🏠 হোম":"🏠 Home") : item==="Quran" ? (lang==="bn"?"📖 কুরআন":"📖 Quran") : item==="Hadith" ? (lang==="bn"?"📚 হাদিস":"📚 Hadith") : item==="Tasbih" ? (lang==="bn"?"📿 তাসবিহ":"📿 Tasbih") : item==="Mosque" ? (lang==="bn"?"🕌 মসজিদ":"🕌 Mosque") : item==="News" ? (lang==="bn"?"📰 সংবাদ":"📰 News") : (lang==="bn"?"🕐 নামাজ / Prayer Times":"🕐 Prayer Times")}
                 </button>
               ))}
               <div style={{ height:1, background:"rgba(255,255,255,.1)", margin:"4px 0" }} />
-              <button onClick={() => { setShowSettings(true); setMobMenu(false); }} style={{ display:"block", width:"100%", textAlign:"left", background:"none", border:"none", color:"rgba(255,255,255,.7)", fontSize:14, cursor:"pointer", padding:"12px 20px", fontFamily:"inherit" }}>{lang==="bn"?"⚙️ সেটিংস":"⚙️ Settings"}</button>
+              <button onClick={() => { setShowSettings(true); setMobMenu(false); }} style={{ display:"block", width:"100%", textAlign:"left", background:"none", border:"none", color:"rgba(255,255,255,.7)", fontSize:14, cursor:"pointer", padding:"14px 20px", fontFamily:"inherit" }}>{lang==="bn"?"⚙️ সেটিংস":"⚙️ Settings"}</button>
+              <button onClick={() => { setShowProfile(true); setMobMenu(false); }} style={{ display:"block", width:"100%", textAlign:"left", background:"none", border:"none", color:"rgba(255,255,255,.7)", fontSize:14, cursor:"pointer", padding:"14px 20px", fontFamily:"inherit" }}>{lang==="bn"?"👤 প্রোফাইল":"👤 Profile"}</button>
             </div>
           )}
         </nav>
