@@ -1,6 +1,5 @@
 "use client";
-import { useState, useEffect, useRef, useCallback, createContext, useContext } from "react";
-import React from "react";
+import React, { useState, useEffect, useRef, useCallback, createContext, useContext } from "react";
 
 // ─── Language Context ─────────────────────────────────────────────────────────
 type Lang = "bn" | "en";
@@ -1276,12 +1275,20 @@ function TasbihPage({ C }: { C:C }) {
         .tf-toggle { transition: background 0.2s; }
         .tf-dhikr-btn { transition: all 0.15s ease; }
         .tf-dhikr-btn:hover { border-color: rgba(17,212,82,0.4) !important; }
+        @media(max-width:900px){
+          .tf-grid { grid-template-columns: 1fr !important; }
+          .tf-sidebar-left, .tf-sidebar-right { display: none !important; }
+          .tf-center { padding: 0 8px !important; }
+          .tf-btn-counter-wrap button { width: 200px !important; height: 200px !important; }
+          .tf-btn-counter-wrap .tf-ring1 { inset: -20px !important; }
+          .tf-btn-counter-wrap .tf-ring2 { inset: -40px !important; }
+        }
       `}</style>
 
-      <div style={{ display:"grid", gridTemplateColumns:"280px 1fr 280px", gap:20, padding:20, minHeight:600 }}>
+      <div className="tf-grid" style={{ display:"grid", gridTemplateColumns:"280px 1fr 280px", gap:20, padding:20, minHeight:600 }}>
 
         {/* ── LEFT SIDEBAR ── */}
-        <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
+        <div className="tf-sidebar-left" style={{ display:"flex", flexDirection:"column", gap:16 }}>
           {/* Dhikr Selection */}
           <div style={{ background:surface, borderRadius:12, border:`1px solid ${border2}`, padding:20 }}>
             <div style={{ fontSize:15, fontWeight:700, color:textMain, marginBottom:4 }}>{lang==="en"?"Dhikr Selection":"যিকির নির্বাচন"}</div>
@@ -1334,7 +1341,7 @@ function TasbihPage({ C }: { C:C }) {
         </div>
 
         {/* ── CENTER COUNTER ── */}
-        <div style={{ display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:24 }}>
+        <div className="tf-center" style={{ display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:24 }}>
           {/* Title */}
           <div style={{ textAlign:"center" }}>
             <div style={{ fontSize:32, fontWeight:800, color:textMain, letterSpacing:"-0.02em", marginBottom:6 }}>{displayName}</div>
@@ -1346,7 +1353,7 @@ function TasbihPage({ C }: { C:C }) {
           </div>
 
           {/* Big Counter Button */}
-          <div style={{ position:"relative" }}>
+          <div className="tf-btn-counter-wrap" style={{ position:"relative" }}>
             <div className="tf-ring1" style={{ position:"absolute", inset:-28, borderRadius:"50%", border:`1px solid ${green}`, opacity:0.15, pointerEvents:"none" }} />
             <div className="tf-ring2" style={{ position:"absolute", inset:-54, borderRadius:"50%", border:`1px solid ${green}`, opacity:0.08, pointerEvents:"none" }} />
             <button ref={btnRef} onClick={tap} className={`tf-btn-counter tf-glow ${pressed?"pressed":""}`}
@@ -1399,7 +1406,7 @@ function TasbihPage({ C }: { C:C }) {
         </div>
 
         {/* ── RIGHT PANEL ── */}
-        <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
+        <div className="tf-sidebar-right" style={{ display:"flex", flexDirection:"column", gap:16 }}>
           {/* Daily Stats */}
           <div style={{ background:surface, borderRadius:12, border:`1px solid ${border2}`, padding:20 }}>
             <div style={{ fontSize:12, fontWeight:600, color:textMain, marginBottom:16 }}>{lang==="en"?"Daily Statistics":"দৈনিক পরিসংখ্যান"}</div>
@@ -1455,14 +1462,6 @@ function TasbihPage({ C }: { C:C }) {
         </div>
 
       </div>
-
-      {/* Mobile Responsive Styles */}
-      <style>{`
-        @media(max-width:900px){
-          .tf-grid { grid-template-columns: 1fr !important; }
-          .tf-sidebar-left, .tf-sidebar-right { display: none; }
-        }
-      `}</style>
     </div>
   );
 }
